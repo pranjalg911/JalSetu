@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jal Setu — Village Water Intelligence &amp; Water Credits Platform</title>
+<meta name="description" content="Jal Setu: predictive village water-stress forecasting, a Jal Sakhi companion, government schemes, and a Water Credits marketplace connecting companies to villages."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.0.0/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --ink:#16232A;
+  --paper:#F1ECDE;
+  --paper-2:#E8E0CB;
+  --card:#FBF8EF;
+  --teal:#1B6E71;
+  --teal-deep:#0E4749;
+  --red:#B23A2E;
+  --red-bg:#F6E2DE;
+  --yellow:#A9701B;
+  --yellow-bg:#F6EAD2;
+  --green:#2F6B45;
+  --green-bg:#E1EEE0;
+  --gold:#B8912B;
+  --line: rgba(22,35,42,0.14);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --shadow: 0 1px 2px rgba(22,35,42,0.06), 0 8px 24px -12px rgba(22,35,42,0.18);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ font-family:var(--font-display); font-weight:600; margin:0 0 .4rem; letter-spacing:-0.01em;}
+p{margin:0 0 .6rem;}
+a{color:var(--teal-deep);}
+.muted{color:#5B5646;}
+.small{font-size:.85rem;}
+.icon{display:inline-block; vertical-align:-3px;}
+
+/* ---------- topographic ripple signature background ---------- */
+.contour-bg{ position:relative; overflow:hidden; }
+.contour-bg::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background-image:
+    repeating-radial-gradient(circle at 82% 18%, transparent 0 26px, rgba(27,110,113,.10) 27px 28px, transparent 29px 54px),
+    repeating-radial-gradient(circle at 8% 88%, transparent 0 20px, rgba(184,145,43,.10) 21px 22px, transparent 23px 42px);
+}
+
+/* ---------- layout ---------- */
+main{max-width:1180px; margin:0 auto; padding:0 1.5rem 4rem;}
+.section{padding-top:2.5rem;}
+.section-head{max-width:640px; margin-bottom:1.4rem;}
+.section-head-row{display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap; margin-bottom:1.4rem;}
+.eyebrow{ text-transform:uppercase; letter-spacing:.09em; font-size:.72rem; font-weight:700; color:var(--teal-deep); font-family:var(--font-mono);}
+
+/* ---------- nav ---------- */
+.nav{ position:sticky; top:0; z-index:20; background:rgba(241,236,222,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+.nav-inner{max-width:1180px; margin:0 auto; padding:.85rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;}
+.brand{display:flex; align-items:center; gap:.5rem; cursor:pointer; background:none; border:none;}
+.brand-mark{color:var(--teal); display:flex;}
+.brand-text{font-family:var(--font-display); font-weight:700; font-size:1.15rem; color:var(--ink); display:flex; flex-direction:column; line-height:1.05;}
+.brand-sub{font-family:var(--font-body); font-weight:400; font-size:.62rem; color:#8a8368; letter-spacing:.04em;}
+.nav-links{display:flex; gap:.15rem; flex-wrap:wrap;}
+.nav-link{
+  display:flex; align-items:center; gap:.4rem; padding:.45rem .7rem; border-radius:8px; border:none;
+  background:none; color:#5B5646; font-family:var(--font-body); font-size:.83rem; font-weight:600; cursor:pointer;
+}
+.nav-link:hover{background:var(--paper-2); color:var(--ink);}
+.nav-link.active{background:var(--teal); color:#fff;}
+
+/* ---------- hero ---------- */
+.hero{padding:3.6rem 1.5rem 2.6rem; border-bottom:1px solid var(--line);}
+.hero-inner{max-width:1180px; margin:0 auto; position:relative;}
+.hero h1{font-size:clamp(1.7rem, 3.2vw, 2.7rem); max-width:15ch; margin-bottom:.9rem;}
+.hero-lede{max-width:58ch; font-size:1.02rem; color:#4A4536;}
+.hero-stats{display:flex; gap:2.2rem; flex-wrap:wrap; margin-top:1.8rem;}
+.hero-stats strong{display:block; font-family:var(--font-mono); font-size:1.5rem; color:var(--teal-deep);}
+.hero-stats span{font-size:.78rem; color:#6b654e;}
+
+/* ---------- role cards ---------- */
+.role-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:1rem; margin-top:2.4rem;}
+.role-card{
+  text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.3rem;
+  cursor:pointer; display:flex; flex-direction:column; gap:.35rem; box-shadow:var(--shadow); transition:transform .15s;
+}
+.role-card:hover{transform:translateY(-2px);}
+.role-card-icon{width:38px; height:38px; border-radius:10px; background:var(--paper-2); color:var(--teal-deep); display:flex; align-items:center; justify-content:center; margin-bottom:.3rem;}
+.role-card h3{font-size:1.05rem;}
+.role-card p{color:#5B5646; font-size:.87rem; flex:1;}
+.role-card-go{font-size:.8rem; font-weight:700; color:var(--teal-deep); display:flex; align-items:center; gap:.25rem;}
+
+/* ---------- loop steps ---------- */
+.loop-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem;}
+.loop-step{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.1rem;}
+.loop-num{font-family:var(--font-mono); color:var(--gold); font-weight:700; font-size:.8rem;}
+.loop-step h3{margin-top:.3rem; font-size:1.05rem;}
+.loop-step p{font-size:.85rem; color:#5B5646;}
+
+/* ---------- cards / grids ---------- */
+.console-grid, .js-grid, .company-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1rem; align-items:start;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.15rem 1.3rem; box-shadow:var(--shadow);}
+.card-lg{grid-column:span 2;}
+@media (max-width:760px){.card-lg{grid-column:span 1;}}
+.card-head{display:flex; justify-content:space-between; align-items:flex-start; gap:.6rem; margin-bottom:.4rem;}
+.card h3{font-size:1.02rem;}
+
+/* ---------- chips / bands ---------- */
+.chip{display:inline-flex; align-items:center; gap:.35rem; font-size:.72rem; font-weight:700; padding:.22rem .55rem; border-radius:99px; white-space:nowrap;}
+.chip .dot{width:7px; height:7px; border-radius:50%;}
+.chip-red{background:var(--red-bg); color:var(--red);}
+.chip-red .dot{background:var(--red);}
+.chip-yellow{background:var(--yellow-bg); color:var(--yellow);}
+.chip-yellow .dot{background:var(--yellow);}
+.chip-green{background:var(--green-bg); color:var(--green);}
+.chip-green .dot{background:var(--green);}
+
+/* ---------- village strip ---------- */
+.village-strip{display:flex; gap:.5rem; overflow-x:auto; padding-bottom:.6rem; margin-bottom:1.2rem;}
+.v-chip{display:flex; align-items:center; gap:.4rem; border:1px solid var(--line); background:var(--card); border-radius:99px; padding:.4rem .8rem; font-size:.78rem; font-weight:600; white-space:nowrap; cursor:pointer; flex-shrink:0;}
+.v-chip-dot{width:8px; height:8px; border-radius:50%;}
+.v-chip-red .v-chip-dot{background:var(--red);}
+.v-chip-yellow .v-chip-dot{background:var(--yellow);}
+.v-chip-green .v-chip-dot{background:var(--green);}
+.v-chip.active{border-color:var(--teal); box-shadow:0 0 0 2px rgba(27,110,113,.18);}
+.v-chip-score{font-family:var(--font-mono); color:#8a8368;}
+
+/* ---------- gauge ---------- */
+.gauge-row{display:flex; gap:1.4rem; align-items:center; flex-wrap:wrap; margin:.8rem 0 1rem;}
+.gauge-svg{width:180px; height:110px;}
+.gauge-score{font-family:var(--font-mono); font-size:26px; font-weight:700;}
+.gauge-label{font-size:9px; fill:#8a8368;}
+.gauge-meta{display:grid; grid-template-columns:repeat(2,1fr); gap:.6rem 1.4rem; flex:1; min-width:220px;}
+.meta-label{display:block; font-size:.7rem; color:#8a8368; text-transform:uppercase; letter-spacing:.05em;}
+.meta-val{font-family:var(--font-mono); font-weight:700; font-size:1rem;}
+
+/* ---------- tables ---------- */
+.mini-table{width:100%; border-collapse:collapse; font-size:.83rem; margin-top:.5rem;}
+.mini-table th{text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; color:#8a8368; padding:.35rem .4rem; border-bottom:1px solid var(--line);}
+.mini-table td{padding:.45rem .4rem; border-bottom:1px solid var(--line);}
+
+/* ---------- advisory ---------- */
+.advisory-list{list-style:none; padding:0; margin:.5rem 0 0; display:flex; flex-direction:column; gap:.6rem;}
+.advisory-list li{display:flex; gap:.6rem; align-items:flex-start;}
+.adv-icon{width:22px; height:22px; border-radius:50%; background:var(--green-bg); color:var(--green); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;}
+.advisory-list strong{font-size:.88rem;}
+.advisory-list p{font-size:.82rem; color:#5B5646; margin:.1rem 0 0;}
+
+/* ---------- stats ---------- */
+.stat-row{display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px dashed var(--line); font-size:.87rem;}
+.stat-row.total{border-bottom:none; border-top:1px solid var(--line); font-weight:700; padding-top:.55rem;}
+.progress{background:var(--paper-2); border-radius:99px; height:8px; overflow:hidden; margin:.5rem 0;}
+.progress-bar{background:var(--teal); height:100%;}
+
+/* ---------- buttons ---------- */
+.btn{
+  font-family:var(--font-body); font-weight:700; font-size:.85rem; border-radius:9px; border:1px solid transparent;
+  padding:.55rem .9rem; display:inline-flex; align-items:center; gap:.4rem; cursor:pointer; margin:.25rem .4rem .25rem 0; text-decoration:none;
+}
+.btn-primary{background:var(--teal); color:#fff;}
+.btn-primary:hover{background:var(--teal-deep);}
+.btn-ghost{background:transparent; border-color:var(--line); color:var(--ink);}
+.btn-ghost:hover{background:var(--paper-2);}
+.btn-done{background:var(--green-bg); color:var(--green); border-color:var(--green);}
+.btn-xs{padding:.3rem .5rem; font-size:.72rem;}
+
+/* ---------- inputs ---------- */
+.select, .input{
+  font-family:var(--font-body); font-size:.85rem; padding:.5rem .65rem; border-radius:8px; border:1px solid var(--line);
+  background:#fff; color:var(--ink);
+}
+.input-sm{width:70px;}
+.calc-row{display:flex; gap:.5rem; margin:.5rem 0;}
+.calc-row .input{flex:1;}
+.calc-result{background:var(--green-bg); color:var(--green); border-radius:8px; padding:.55rem .7rem; font-size:.85rem; font-weight:600;}
+
+/* ---------- companion ---------- */
+.companion-card{grid-column:span 2;}
+@media (max-width:760px){.companion-card{grid-column:span 1;}}
+.companion-log{background:var(--paper-2); border-radius:10px; padding:.8rem; min-height:70px; display:flex; flex-direction:column; gap:.5rem; margin:.6rem 0;}
+.bubble{max-width:80%; padding:.5rem .75rem; border-radius:10px; font-size:.85rem;}
+.bubble-bot{background:#fff; align-self:flex-start; border:1px solid var(--line);}
+.bubble-user{background:var(--teal); color:#fff; align-self:flex-end;}
+.companion-actions{display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;}
+.mic-btn{width:44px; height:44px; border-radius:50%; border:none; background:var(--teal); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+.mic-btn.listening{background:var(--red); animation:pulse 1.1s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(178,58,46,.5);}70%{box-shadow:0 0 0 12px rgba(178,58,46,0);}100%{box-shadow:0 0 0 0 rgba(178,58,46,0);}}
+.chip-btn{display:inline-flex; align-items:center; gap:.35rem; border:1px solid var(--line); background:#fff; border-radius:99px; padding:.4rem .75rem; font-size:.78rem; font-weight:600; cursor:pointer;}
+.chip-btn:hover{background:var(--paper-2);}
+
+/* ---------- schemes ---------- */
+.scheme-filters{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1rem;}
+.filter-pill{border:1px solid var(--line); background:var(--card); border-radius:99px; padding:.35rem .8rem; font-size:.78rem; font-weight:600; cursor:pointer;}
+.filter-pill.active{background:var(--teal); color:#fff; border-color:var(--teal);}
+.scheme-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1rem;}
+.scheme-card{display:flex; flex-direction:column;}
+.scheme-head{display:flex; gap:.4rem; margin-bottom:.4rem; flex-wrap:wrap;}
+.scheme-level{background:var(--paper-2); font-size:.68rem; font-weight:700; padding:.15rem .5rem; border-radius:6px; color:#6b654e;}
+.scheme-cat{background:var(--teal-deep); color:#fff; font-size:.68rem; font-weight:700; padding:.15rem .5rem; border-radius:6px;}
+.scheme-benefit{font-size:.85rem; color:#4A4536; margin-top:.3rem;}
+.scheme-card details{margin-top:.4rem; font-size:.83rem;}
+.scheme-card summary{cursor:pointer; font-weight:700; color:var(--teal-deep); margin-bottom:.3rem;}
+.tiny-list{margin:.2rem 0 .5rem; padding-left:1.1rem; font-size:.82rem; color:#5B5646;}
+.scheme-actions{margin-top:auto; padding-top:.6rem; display:flex; gap:.4rem; flex-wrap:wrap;}
+
+/* ---------- marketplace ---------- */
+.marketplace-controls{display:flex; gap:.6rem; margin-bottom:1rem; flex-wrap:wrap;}
+.market-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem;}
+.buy-row{display:flex; gap:.5rem; align-items:center; margin-top:.5rem;}
+.tier-badge{font-size:.7rem; font-weight:700; padding:.2rem .55rem; border-radius:6px;}
+.tier-bronze{background:#EADBC8; color:#7C5A2E;}
+.tier-silver{background:#E4E4E4; color:#5A5A5A;}
+.tier-gold{background:#F6E7B8; color:#8A6A0E;}
+.tier-platinum{background:#DCEFEC; color:#0E4749;}
+
+/* ---------- ledger ---------- */
+.ledger-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:1.4rem;}
+.stat-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; box-shadow:var(--shadow);}
+.stat-card span{color:var(--teal); display:block; margin-bottom:.3rem;}
+.stat-card strong{font-family:var(--font-mono); font-size:1.35rem; display:block;}
+.stat-card p{font-size:.78rem; color:#6b654e; margin:.15rem 0 0;}
+.alloc-legend{display:flex; flex-direction:column; gap:.4rem; font-size:.82rem; margin-top:.7rem;}
+.alloc-legend .sw{width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:.4rem;}
+
+/* ---------- awards ---------- */
+.award-hero{display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; background:linear-gradient(120deg, var(--card), #FBF3DC);}
+.award-hero-icon{color:var(--gold);}
+.award-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-top:1rem;}
+.award-mini{text-align:center;}
+.award-mini-icon{color:var(--gold); display:block; margin-bottom:.3rem;}
+
+/* ---------- modal ---------- */
+#modal-root{display:none;}
+#modal-root.open{display:block;}
+.modal-backdrop{position:fixed; inset:0; background:rgba(22,35,42,.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:1rem;}
+.modal{background:var(--card); border-radius:14px; padding:1.4rem; max-width:420px; width:100%; box-shadow:var(--shadow);}
+.form-label{display:block; font-size:.78rem; font-weight:700; margin:.6rem 0 .3rem; color:#5B5646;}
+.modal .input, .modal .select{width:100%;}
+.modal-actions{display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem;}
+
+/* ---------- toast ---------- */
+#toast-root{position:fixed; bottom:1.4rem; left:50%; transform:translateX(-50%); z-index:60;}
+.toast{background:var(--ink); color:#fff; padding:.7rem 1.1rem; border-radius:99px; font-size:.85rem; display:flex; align-items:center; gap:.4rem; box-shadow:var(--shadow);}
+
+/* ---------- footer ---------- */
+.site-footer{max-width:1180px; margin:3rem auto 0; padding:1.4rem 1.5rem 2rem; border-top:1px solid var(--line); font-size:.78rem; color:#8a8368;}
+
+/* ---------- misc ---------- */
+details summary::-webkit-details-marker{display:none;}
+
+/* ---------- login screen ---------- */
+.login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem; position:relative; overflow:hidden;}
+.login-card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:2.2rem; max-width:380px; width:100%; box-shadow:var(--shadow); position:relative; z-index:2;}
+.login-brand{display:flex; align-items:center; gap:.6rem; margin-bottom:1.4rem;}
+.login-brand span{color:var(--teal);}
+.login-error{background:var(--red-bg); color:var(--red); border-radius:8px; padding:.5rem .7rem; font-size:.8rem; margin-top:.6rem;}
+.login-demo{margin-top:1.2rem; padding-top:1rem; border-top:1px dashed var(--line); font-size:.76rem; color:#8a8368;}
+.login-demo code{background:var(--paper-2); padding:.1rem .35rem; border-radius:5px;}
+
+/* ---------- animated hero waves ---------- */
+.hero-anim{position:absolute; inset:0; overflow:hidden; pointer-events:none; opacity:.55;}
+.hero-anim svg{position:absolute; bottom:-10px; left:0; width:200%; height:120px;}
+.hero-wave1{animation:drift 18s linear infinite;}
+.hero-wave2{animation:drift 26s linear infinite reverse; opacity:.5;}
+@keyframes drift{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+.hero-inner{position:relative; z-index:2;}
+
+/* ---------- video resource cards ---------- */
+.video-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem;}
+.video-card iframe{width:100%; aspect-ratio:16/9; border-radius:10px; border:none; display:block;}
+.video-card p{margin-top:.5rem;}
+
+/* ---------- connection status ---------- */
+.conn-badge{display:inline-flex; align-items:center; gap:.35rem; font-size:.72rem; font-weight:700; padding:.2rem .6rem; border-radius:99px;}
+.conn-ok{background:var(--green-bg); color:var(--green);}
+.conn-bad{background:var(--red-bg); color:var(--red);}
+.lang-select{font-size:.78rem; padding:.3rem .5rem; border-radius:7px; border:1px solid var(--line); background:#fff;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<script>
+/* Minimal hand-drawn icon set — 24x24 viewbox, stroke = currentColor */
+const ICON_PATHS = {
+  droplet: '<path d="M12 2.5c3.2 4.4 6.2 8.1 6.2 11.7a6.2 6.2 0 1 1-12.4 0C5.8 10.6 8.8 6.9 12 2.5Z"/>',
+  alert: '<path d="M12 3.5 21.5 20h-19L12 3.5Z"/><path d="M12 9.5v4.2"/><circle cx="12" cy="16.8" r="0.9" fill="currentColor" stroke="none"/>',
+  users: '<circle cx="9" cy="8" r="3.2"/><path d="M2.8 20c.7-3.4 3.2-5.4 6.2-5.4s5.5 2 6.2 5.4"/><circle cx="17.5" cy="8.6" r="2.4"/><path d="M16.3 14.8c2.3.4 4 2.1 4.6 4.6"/>',
+  truck: '<rect x="2" y="8" width="12" height="8" rx="1"/><path d="M14 11h4l3.5 3.2V16h-7.5z"/><circle cx="7" cy="18.2" r="1.6"/><circle cx="17.5" cy="18.2" r="1.6"/>',
+  wrench: '<path d="M14.7 6.3a4 4 0 0 1-5.4 5.1L4 16.7l1.9 1.9 5.4-5.3a4 4 0 0 1 5.1-5.4l-2.4 2.4-1.7-1.7 2.4-2.3Z"/>',
+  check: '<path d="M4 12.5 9.5 18 20 6"/>',
+  trend: '<path d="M3 17 9.5 9.5 14 14 21 5.5"/><path d="M15.5 5.2H21v5.5"/>',
+  gauge: '<path d="M4 15.5a8 8 0 1 1 16 0"/><path d="M12 15.5 16 10"/><circle cx="12" cy="15.5" r="1.1" fill="currentColor" stroke="none"/>',
+  radio: '<circle cx="12" cy="12" r="2.2"/><path d="M7.8 8.2a6 6 0 0 0 0 7.6M16.2 8.2a6 6 0 0 1 0 7.6M4.7 5.2a10.4 10.4 0 0 0 0 13.6M19.3 5.2a10.4 10.4 0 0 1 0 13.6"/>',
+  waves: '<path d="M2 8c2 1.6 4 1.6 6 0s4-1.6 6 0 4 1.6 6 0"/><path d="M2 13.5c2 1.6 4 1.6 6 0s4-1.6 6 0 4 1.6 6 0"/><path d="M2 19c2 1.6 4 1.6 6 0s4-1.6 6 0 4 1.6 6 0"/>',
+  clipboard: '<rect x="5" y="4.5" width="14" height="17" rx="1.5"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4.5"/>',
+  shield: '<path d="M12 3 19.5 6v6c0 5-3.2 8-7.5 9-4.3-1-7.5-4-7.5-9V6L12 3Z"/><path d="M9 12l2 2 4-4.2"/>',
+  sprout: '<path d="M12 21v-8"/><path d="M12 13c0-3.5-2.5-6-7-6 0 4.5 2.7 6.9 7 6Z"/><path d="M12 11c0-4 2.8-6.8 7.5-6.8 0 5-3 7.6-7.5 6.8Z"/>',
+  mic: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21M8.5 21h7"/>',
+  micOff: '<path d="M3.5 3.5 20.5 20.5"/><path d="M9.5 4.6A3 3 0 0 1 15 6.5v4.3c0 .4-.05.8-.15 1.15M9 9.5v1c0 1.66 1.34 3 3 3 .4 0 .77-.08 1.1-.22"/><path d="M5.5 11a6.5 6.5 0 0 0 9.4 5.8M18.5 11a6.4 6.4 0 0 1-.6 2.7"/><path d="M12 17.5V21M8.5 21h7"/>',
+  pin: '<path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/>',
+  award: '<circle cx="12" cy="8.5" r="5.5"/><path d="M8.5 13.3 6.5 21l5.5-3 5.5 3-2-7.7"/>',
+  coin: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v9M9.3 9.6c0-1.3 1.2-2.1 2.7-2.1 1.7 0 2.8.9 2.8 2 0 3-5.5 1.6-5.5 4.6 0 1.2 1.2 2 2.7 2 1.5 0 2.7-.8 2.7-2.1"/>',
+  building: '<rect x="4" y="3" width="10" height="18" rx="1"/><rect x="14" y="9" width="6" height="12" rx="1"/><path d="M7.5 7h3M7.5 11h3M7.5 15h3"/>',
+  leaf: '<path d="M20 4C10 4 4 10.5 4 18c0 .7 0 1 0 1s.3 0 1 0c7.5 0 14-6 14-15Z"/><path d="M6 18c3-5 7-8 13-10.5"/>',
+  download: '<path d="M12 3v12.5M7.5 11 12 15.5 16.5 11"/><path d="M4.5 18h15v2.5h-15z"/>',
+  chevron: '<path d="M9 6l7 6-7 6"/>',
+  phone: '<path d="M6 3.5h3l1.5 4-2 1.8a12 12 0 0 0 5.2 5.2l1.8-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5C11.5 18 6 12.5 4.5 6.1 4.4 5.3 5 4.5 6 3.5Z"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="1.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  filter: '<path d="M4 5h16l-6 7.5v6L10 21v-8.5Z"/>',
+  arrowRight: '<path d="M4 12h15M13 6l6 6-6 6"/>',
+  home: '<path d="M4 11 12 4l8 7"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-6h4v6"/>',
+  contour: '<path d="M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0Z"/><path d="M5.5 12a6.5 6.5 0 1 0 13 0 6.5 6.5 0 1 0-13 0Z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 1 0-6 0Z"/>',
+  crop: '<path d="M12 20V9"/><path d="M12 12c0-3.5 2.6-6.5 7-7 0 4.7-2.7 7.4-7 7Z"/><path d="M12 15c0-3-2-5.4-5.5-6 0 3.9 2.1 6.2 5.5 6Z"/>',
+  book: '<path d="M4 5.5C6 4.3 9 4 12 5c3-1 6-.7 8 .5v13c-2-1.2-5-1.5-8-.5-3-1-6-.7-8 .5Z"/><path d="M12 5v13.5"/>',
+  play: '<circle cx="12" cy="12" r="9.3"/><path d="M10 8.3 16 12l-6 3.7Z" fill="currentColor" stroke="none"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  logout: '<path d="M9 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H9"/><path d="M15 16l4-4-4-4"/><path d="M19 12H9"/>',
+};
+function icon(name, size = 18, cls = "") {
+  const d = ICON_PATHS[name] || ICON_PATHS.droplet;
+  return `<svg class="icon ${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+}
+
+/* =========================================================================
+   JAL SETU — CONNECTED FRONTEND
+   Talks to the real Flask API (src/api_server.py) instead of hardcoded
+   data. Run: python src/api_server.py, then open http://localhost:5000
+   ========================================================================= */
+
+const API_BASE = ""; // same origin — api_server.py serves this file too
+
+/* ---- Auth ---------------------------------------------------------- */
+const auth = {
+  token: localStorage.getItem("jalsetu_token") || null,
+  role: localStorage.getItem("jalsetu_role") || null,
+  villageId: localStorage.getItem("jalsetu_village") || null,
+  username: localStorage.getItem("jalsetu_username") || null,
+};
+function setAuth(data) {
+  auth.token = data.token; auth.role = data.role; auth.villageId = data.village_id; auth.username = data.username;
+  localStorage.setItem("jalsetu_token", data.token);
+  localStorage.setItem("jalsetu_role", data.role);
+  localStorage.setItem("jalsetu_village", data.village_id || "");
+  localStorage.setItem("jalsetu_username", data.username);
+}
+function clearAuth() {
+  auth.token = null; auth.role = null; auth.villageId = null; auth.username = null;
+  localStorage.removeItem("jalsetu_token"); localStorage.removeItem("jalsetu_role");
+  localStorage.removeItem("jalsetu_village"); localStorage.removeItem("jalsetu_username");
+}
+function isLoggedIn() { return !!auth.token; }
+
+async function apiFetch(path, options = {}) {
+  const headers = Object.assign({}, options.headers, auth.token ? { Authorization: "Bearer " + auth.token } : {});
+  if (options.body) headers["Content-Type"] = "application/json";
+  const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+  if (!res.ok) {
+    let msg = "Request failed";
+    try { msg = (await res.json()).error || msg; } catch (e) {}
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+/* ---- Connection status (so the UI is honest about live vs. offline) -- */
+let backendOnline = false;
+async function checkBackend() {
+  try {
+    await apiFetch("/api/villages");
+    backendOnline = true;
+  } catch (e) {
+    backendOnline = false;
+  }
+}
+
+/* ---- Deterministic "product layer" fields not modeled by the ML backend
+   (population, Jal Sakhi contact, participation, etc.) — seeded by
+   village_id so they stay stable across reloads, clearly separate from
+   the real severity/geology/advisory fields which DO come from the API. */
+const VILLAGE_NAME_POOL = [
+  "Wadgaon Kolhati", "Kada Budruk", "Shirur Kasarwadi", "Ghansangvi", "Pathri Vasti",
+  "Manwath Khurd", "Tuljapur Wadi", "Renapur", "Kandhar Bk", "Ambajogai Wadi",
+  "Georai Khurd", "Sonpeth Vasti", "Partur Bk", "Bhokardan Wadi", "Kaij Kh",
+];
+const JAL_SAKHI_NAME_POOL = [
+  "Sunita Jadhav", "Kavita Shinde", "Manisha Pawar", "Vaishali Kale", "Rekha More",
+  "Anita Suryavanshi", "Pooja Deshmukh", "Savita Gaikwad", "Nirmala Bhosale", "Sangeeta Pawar",
+];
+function seededRand(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) { h = (h << 5) - h + str.charCodeAt(i); h |= 0; }
+  return () => { h = (h * 1103515245 + 12345) & 0x7fffffff; return h / 0x7fffffff; };
+}
+function pick(arr, r) { return arr[Math.floor(r() * arr.length)]; }
+
+function deriveDemoFields(apiVillage) {
+  const r = seededRand(apiVillage.village_id);
+  const name = pick(VILLAGE_NAME_POOL, r);
+  const jalSakhiName = pick(JAL_SAKHI_NAME_POOL, r);
+  const population = Math.round(1800 + r() * 4000);
+  const households = Math.round(population / 5.1);
+  const severity = apiVillage.severity_score_predicted;
+  return {
+    name,
+    district: apiVillage.taluka, // village_static_data.csv only carries taluka; district mirrors it here
+    jalSakhi: { name: jalSakhiName, phone: "+91 90490 1" + String(Math.floor(r() * 9000) + 1000), since: String(2020 + Math.floor(r() * 4)) },
+    population, households,
+    quality: Math.round(55 + (100 - severity) * 0.3 + r() * 10),
+    participation: Math.round(55 + (100 - severity) * 0.25 + r() * 15),
+    availability: Math.round(20 + (100 - severity) * 0.6),
+    trendImprovement: Math.round((r() - 0.5) * 20),
+    creditPriceMult: severity >= 65 ? 1.3 + r() * 0.1 : severity >= 35 ? 1.0 : 0.85,
+    fundingGoal: Math.round((150000 + severity * 5000) / 10000) * 10000,
+  };
+}
+
+/* ---- Frontend-domain severity banding (red/yellow/green), computed from
+   the REAL severity score returned by the API — independent of the
+   Low/Moderate/High/Critical labels the backend's own advisory bands use,
+   which are a different (also real) scale used in the advisory text. */
+function severityBand(score) {
+  if (score >= 65) return "red";
+  if (score >= 35) return "yellow";
+  return "green";
+}
+const BAND_META = {
+  red:    { label: "Critical",  short: "Red",    color: "#B23A2E", bg: "#F6E2DE", ring: "#8E2C22" },
+  yellow: { label: "Stressed",  short: "Yellow", color: "#A9701B", bg: "#F6EAD2", ring: "#8A5A15" },
+  green:  { label: "Safe",      short: "Green",  color: "#2F6B45", bg: "#E1EEE0", ring: "#24532F" },
+};
+/* ---- Villages — now loaded from the REAL API, not hardcoded --------- */
+let VILLAGES = []; // populated by loadVillages()
+
+async function loadVillages() {
+  const apiVillages = await apiFetch("/api/villages");
+  VILLAGES = apiVillages.map(v => {
+    const demo = deriveDemoFields(v);
+    return {
+      id: v.village_id,
+      taluka: v.taluka,
+      geology: v.geology_type,
+      recharge: v.aquifer_recharge_potential,
+      severity: v.severity_score_predicted,
+      band: severityBand(v.severity_score_predicted),
+      sugarcane: v.pct_area_sugarcane,
+      borewellDensity: v.borewell_density_per_sqkm,
+      rainfallDeficit: v.rainfall_deficit_pct_vs_normal,
+      recommendedAction: v.recommended_action, // real advisory text from severity_engine.py
+      creditsSold: 0, fundsRaised: 0, litersOffset: 0, stipendPool: 0,
+      ...demo,
+    };
+  });
+}
+
+function village(id) { return VILLAGES.find(v => v.id === id); }
+
+/* Advisory list for display — parses the REAL advisory string the
+   backend generated (severity_engine.py::advise), split on its own
+   " | " delimiter. No client-side re-invention of the rule engine. */
+function adviseList(v) {
+  return v.recommendedAction.split(" | ").map(text => {
+    const title = text.split(":")[0].split(" — ")[0].split(",")[0].slice(0, 40);
+    return { title: text, desc: "" };
+  });
+}
+
+/* Twins — fetched fresh per village from the API (topographic matcher) */
+async function fetchTwins(villageId) {
+  const detail = await apiFetch(`/api/village/${villageId}`);
+  return detail.twins;
+}
+
+function forecastTrend(finalScore) {
+  // NOTE: the backend currently returns a single 6-week-ahead point
+  // estimate, not a full weekly trajectory. This curve is an ILLUSTRATIVE
+  // interpolation anchored on that real endpoint — it is not itself a
+  // per-week model output. Flagged here and in the UI caption.
+  const start = Math.max(finalScore - 26, 8);
+  const weeks = 8;
+  return Array.from({ length: weeks }, (_, i) => {
+    const frac = i / (weeks - 1);
+    const eased = 1 - Math.pow(1 - frac, 2);
+    return { week: `Wk ${i + 1}`, severity: Math.round((start + (finalScore - start) * eased) * 10) / 10 };
+  });
+}
+
+let FEATURE_IMPORTANCE = []; // loaded from /api/feature-importance
+async function loadFeatureImportance() {
+  const raw = await apiFetch("/api/feature-importance");
+  FEATURE_IMPORTANCE = raw.map(f => ({ name: f.feature.replace(/_/g, " "), value: Math.round(f.importance * 1000) / 10 }));
+}
+
+/* ---- Government schemes — real programme info, static reference ----- */
+const SCHEMES = [
+  { id:"jjm", name:"Jal Jeevan Mission (JJM)", level:"Central", category:"Water Infrastructure",
+    agency:"Dept. of Drinking Water & Sanitation, Ministry of Jal Shakti",
+    benefit:"Functional household tap connections for every rural home; village Paani Samiti / VWSC members (Jal Sakhis included) receive an honorarium for water-quality field testing with FTK kits and for maintaining the village water & sanitation register.",
+    eligibility:["Resident of a rural habitation covered under JJM","Willingness to join / already part of the Village Water & Sanitation Committee (Paani Samiti)","Basic literacy to log FTK test results"],
+    documents:["Aadhaar card","Bank passbook","Gram Panchayat nomination / resolution as Paani Samiti member"],
+    link:"https://ejalshakti.gov.in/jjm/" },
+  { id:"abhy", name:"Atal Bhujal Yojana (Atal Jal)", level:"Central + State", category:"Groundwater Management",
+    agency:"Dept. of Water Resources, River Development & Ganga Rejuvenation — active in water-stressed blocks of Maharashtra",
+    benefit:"Community-led groundwater Water Security Plans; local women mobilisers (often the Jal Sakhi) are engaged to run Gram Sabha water-budgeting sessions and are compensated for facilitation work.",
+    eligibility:["Village located in an identified water-stressed Atal Jal block","Active participation in Gram Sabha groundwater discussions"],
+    documents:["Aadhaar card","Bank passbook","Gram Sabha attendance / resolution record"],
+    link:"https://ataljal.mowr.gov.in/" },
+  { id:"jsa", name:"Jalyukt Shivar Abhiyan 2.0", level:"State (Maharashtra)", category:"Watershed & Water Conservation",
+    agency:"Water Conservation Dept., Government of Maharashtra",
+    benefit:"Funds check-dams, farm ponds, nala-widening and desilting works; Jal Sakhis / village women's groups can propose worksites and are engaged as site-monitoring volunteers, often paid through MGNREGA convergence.",
+    eligibility:["Village notified under Jalyukt Shivar 2.0 (typically water-stressed talukas)","Site proposal endorsed by the Gram Panchayat / Watershed Committee"],
+    documents:["Gram Panchayat resolution","Site survey / measurement sheet","Aadhaar-linked bank account"],
+    link:"https://mahayojana.maharashtra.gov.in/" },
+  { id:"mgnrega", name:"MGNREGA — Water Conservation Works", level:"Central", category:"Guaranteed Wage Employment",
+    agency:"Ministry of Rural Development",
+    benefit:"100 days of guaranteed wage employment per household per year; a large share of permissible works are percolation tanks, farm ponds and check-dams — Jal Sakhis can be engaged as work-site mates (skilled facilitators) at a higher wage tier.",
+    eligibility:["Adult member of a rural household with a Job Card","Willingness to work on notified water-conservation worksites"],
+    documents:["MGNREGA Job Card","Aadhaar-seeded bank account"],
+    link:"https://nrega.nic.in/" },
+  { id:"pmksy", name:"Pradhan Mantri Krishi Sinchayee Yojana — Per Drop More Crop", level:"Central", category:"Irrigation Efficiency",
+    agency:"Ministry of Agriculture & Farmers Welfare",
+    benefit:"Subsidy (up to 55% for small/marginal farmers) on drip and sprinkler irrigation, cutting groundwater draw per acre; Jal Sakhis can facilitate farmer applications during crop-shift advisories.",
+    eligibility:["Land-owning or leasing farmer in the village","Crop suitable for micro-irrigation (sugarcane, horticulture, cotton, etc.)"],
+    documents:["7/12 land extract","Aadhaar card","Bank passbook"],
+    link:"https://pmksy.gov.in/" },
+  { id:"mksp", name:"Mahila Kisan Sashaktikaran Pariyojana (MKSP)", level:"Central + State", category:"Women's Livelihood",
+    agency:"DAY-NRLM, Ministry of Rural Development",
+    benefit:"Training and livelihood stipend support for women engaged in agriculture and natural-resource / water stewardship roles — many Jal Sakhi honorarium structures are routed through MKSP-linked SHG federations.",
+    eligibility:["Woman member of a Self-Help Group (SHG) under NRLM / Umed Maharashtra State Rural Livelihood Mission","Engaged in agriculture, water or allied livelihood activity"],
+    documents:["SHG membership record","Aadhaar card","Bank passbook"],
+    link:"https://aajeevika.gov.in/" },
+  { id:"nrlm", name:"DAY-NRLM — Community Resource Person (CRP) Honorarium", level:"Central", category:"Livelihood & Institution Building",
+    agency:"National Rural Livelihood Mission (Umed — Maharashtra State Rural Livelihood Mission)",
+    benefit:"Paid Community Resource Person role for SHG-linked women who train and mobilise other villages — the most common route through which a Jal Sakhi's monthly honorarium is formally recognised and disbursed.",
+    eligibility:["Active SHG member in good standing","Completion of CRP training module (water / livelihood track)"],
+    documents:["SHG membership record","Aadhaar card","Bank passbook","CRP training certificate"],
+    link:"https://umed.in/" },
+  { id:"sbmg", name:"Swachh Bharat Mission — Grameen (Phase II)", level:"Central", category:"Water Quality & Sanitation",
+    agency:"Dept. of Drinking Water & Sanitation",
+    benefit:"Incentive funds to Gram Panchayats for ODF-Plus status, greywater management and water-quality monitoring — village functionaries including Jal Sakhis are eligible for a monitoring honorarium.",
+    eligibility:["Gram Panchayat pursuing / holding ODF-Plus status","Willingness to conduct household greywater / sanitation surveys"],
+    documents:["Gram Panchayat nomination","Aadhaar card"],
+    link:"https://swachhbharatmission.gov.in/" },
+  { id:"csr", name:"Corporate CSR Water Stewardship Funds (Companies Act, Sec. 135)", level:"Private (Central mandate)", category:"CSR Convergence",
+    agency:"Company CSR programmes, Schedule VII (iv) — water conservation & rural development",
+    benefit:"Companies are mandated to spend 2% of average net profit on CSR; water conservation is an explicit eligible head. This is exactly the channel the Jal Setu Water Credits Marketplace plugs into — Jal Sakhis should track which local works are CSR-funded so village asks are not duplicated.",
+    eligibility:["No individual eligibility — village-level infrastructure proposals routed via Gram Panchayat / NGO partner"],
+    documents:["Detailed Project Report (DPR) for the proposed work","Gram Panchayat resolution"],
+    link:"https://www.csr.gov.in/" },
+];
+
+/* ---- Existing solutions — reference videos (per your request) ------- */
+const RESOURCE_VIDEOS = [
+  { id:"ir7HwZK_7Qg", title:"Existing water conservation model", note:"Community-driven watershed approach — useful reference for check-dam and rainwater harvesting siting." },
+  { id:"bz53sZ810kA", title:"Existing water conservation model", note:"Field-level water management practices villages have already implemented." },
+  { id:"IEyAzDFO_5g", title:"Existing water conservation model", note:"Another real-world approach to rural water stewardship." },
+];
+
+/* ---- Companies + Water Credits marketplace — PRODUCT-LAYER SIMULATION.
+   This is NOT modeled by the ML backend (no sensor/model predicts CSR
+   giving or credit pricing) — it's a demo of the funding mechanism the
+   platform proposes. Seeded from the real village list so severity/band
+   driving credit price IS real; the transactions themselves are simulated. */
+const COMPANIES = [
+  { id:"C001", name:"Deccan AgroChem Ltd.", industry:"Agrochemicals", monthlyLiters:4200000 },
+  { id:"C002", name:"Marathwada Textile Mills", industry:"Textiles & Dyeing", monthlyLiters:6800000 },
+  { id:"C003", name:"Beed Sugar Co-operative", industry:"Sugar Processing", monthlyLiters:9500000 },
+];
+COMPANIES.forEach(c => { c.totalSpent = 0; c.totalCredits = 0; c.impactPoints = 0; c.villagesSupported = new Set(); });
+
+const LEDGER = [];
+let txCounter = 1;
+const CREDIT_BASE_PRICE = 200;
+const CREDIT_LITERS = 1000;
+const ALLOCATION = { infra: 0.60, stipend: 0.25, platform: 0.15 };
+const IMPACT_MULT = { red: 3, yellow: 2, green: 1 };
+
+function creditPrice(v) { return Math.round(CREDIT_BASE_PRICE * v.creditPriceMult); }
+function recommendedCredits(monthlyLiters) { return Math.max(5, Math.round((monthlyLiters * 0.10) / CREDIT_LITERS)); }
+
+function recordTransaction(companyId, villageId, credits) {
+  const c = COMPANIES.find(x => x.id === companyId);
+  const v = village(villageId);
+  const price = creditPrice(v);
+  const amount = price * credits;
+  const allocation = {
+    infra: Math.round(amount * ALLOCATION.infra),
+    stipend: Math.round(amount * ALLOCATION.stipend),
+    platform: Math.round(amount * ALLOCATION.platform),
+  };
+  const tx = { id: "TXN" + String(txCounter++).padStart(4, "0"), date: new Date().toISOString().slice(0, 10),
+    companyId, villageId, credits, price, amount, allocation };
+  LEDGER.unshift(tx);
+  v.creditsSold += credits; v.fundsRaised += amount; v.litersOffset += credits * CREDIT_LITERS; v.stipendPool += allocation.stipend;
+  c.totalSpent += amount; c.totalCredits += credits; c.impactPoints += credits * IMPACT_MULT[v.band]; c.villagesSupported.add(villageId);
+  return tx;
+}
+
+function awardScore(v) {
+  return Math.round((100 - v.severity) * 0.35 + v.participation * 0.25 + v.quality * 0.2 + v.availability * 0.1 + (v.trendImprovement + 10) * 1.0);
+}
+function rankedVillages() { return [...VILLAGES].sort((a, b) => awardScore(b) - awardScore(a)); }
+function mostImproved() { return [...VILLAGES].sort((a, b) => b.trendImprovement - a.trendImprovement)[0]; }
+function highestParticipation() { return [...VILLAGES].sort((a, b) => b.participation - a.participation)[0]; }
+function bestQuality() { return [...VILLAGES].sort((a, b) => b.quality - a.quality)[0]; }
+
+const BASE_STIPEND = 3000;
+function stipendFor(v) {
+  const performanceBonus = Math.round((v.participation / 100) * 1200);
+  const fundBonus = Math.round(v.stipendPool * 0.15);
+  return { base: BASE_STIPEND, performanceBonus, fundBonus, total: BASE_STIPEND + performanceBonus + fundBonus };
+}
+
+const SCHEME_APPLICATIONS = {}; // populated once villages load
+function nextTuesday() {
+  const d = new Date();
+  d.setDate(d.getDate() + ((2 - d.getDay() + 7) % 7 || 7));
+  return d;
+}
+const state = {
+  role: "home",
+  selectedVillageId: null,
+  activeJalSakhiVillageId: null,
+  activeCompanyId: "C001",
+  companionLog: [],
+  marketplaceSort: "severity",
+  marketplaceDistrict: "all",
+  schemeFilter: "all",
+  toast: null,
+  listening: false,
+  voiceLang: "en-IN",
+  companyLiters: "",
+  loading: true,
+  loadError: null,
+  currentTwins: [],
+  currentLeaks: [],
+  currentTankers: [],
+};
+
+const charts = {};
+
+function fmtINR(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
+function fmtNum(n) { return Math.round(n).toLocaleString("en-IN"); }
+function bandChip(band, extra = "") {
+  const m = BAND_META[band];
+  return `<span class="chip chip-${band} ${extra}"><span class="dot"></span>${m.label}</span>`;
+}
+function setRole(role) { state.role = role; window.scrollTo({ top: 0, behavior: "smooth" }); render(); }
+function showToast(msg) {
+  state.toast = msg; renderToast();
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { state.toast = null; renderToast(); }, 3200);
+}
+function openModal(html) {
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `<div class="modal-backdrop" data-action="closeModal"><div class="modal" onclick="event.stopPropagation()">${html}</div></div>`;
+  root.classList.add("open");
+}
+function closeModal() {
+  const root = document.getElementById("modal-root");
+  root.classList.remove("open"); root.innerHTML = "";
+}
+
+/* --------------------------------------------------------------------- */
+/*  LOGIN SCREEN                                                          */
+/* --------------------------------------------------------------------- */
+function renderLogin() {
+  return `
+  <div class="login-wrap contour-bg">
+    <div class="hero-anim">${heroWavesSVG()}</div>
+    <div class="login-card">
+      <div class="login-brand">
+        <span>${icon("waves", 26)}</span>
+        <div class="brand-text" style="font-size:1.3rem">Jal Setu<span class="brand-sub">जल सेतु</span></div>
+      </div>
+      <p class="muted small">Sign in to view live village severity data, Jal Sakhi tools, or the company dashboard.</p>
+      <label class="form-label">Username</label>
+      <input class="input" id="login-username" style="width:100%" placeholder="e.g. jalsakhi"/>
+      <label class="form-label">Password</label>
+      <input class="input" id="login-password" type="password" style="width:100%"/>
+      <div id="login-error"></div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:1rem" data-action="doLogin">
+        ${icon("lock", 16)} Sign in
+      </button>
+      <div class="login-demo">
+        <p><strong>Demo accounts</strong> (change before real deployment):</p>
+        <p>Jal Sakhi: <code>jalsakhi</code> / <code>jalsakhi123</code></p>
+        <p>Company: <code>company</code> / <code>company123</code></p>
+        <p>Admin: <code>admin</code> / <code>admin123</code></p>
+      </div>
+    </div>
+  </div>`;
+}
+function heroWavesSVG() {
+  return `<svg class="hero-wave1" viewBox="0 0 1600 120" preserveAspectRatio="none"><path d="M0,60 C200,120 400,0 600,60 C800,120 1000,0 1200,60 C1400,120 1600,0 1600,60 L1600,120 L0,120 Z" fill="#1B6E71"/></svg>
+  <svg class="hero-wave2" viewBox="0 0 1600 120" preserveAspectRatio="none"><path d="M0,80 C200,20 400,120 600,70 C800,20 1000,120 1200,70 C1400,20 1600,120 1600,70 L1600,120 L0,120 Z" fill="#B8912B"/></svg>`;
+}
+
+/* --------------------------------------------------------------------- */
+/*  NAV                                                                    */
+/* --------------------------------------------------------------------- */
+function renderNav() {
+  const items = [
+    { id: "home", label: "Home", icon: "home" },
+    { id: "console", label: "Village Console", icon: "gauge" },
+    { id: "jalsakhi", label: "Jal Sakhi", icon: "droplet" },
+    { id: "company", label: "Company", icon: "building" },
+    { id: "ledger", label: "Credits & Ledger", icon: "coin" },
+    { id: "awards", label: "Awards", icon: "award" },
+    { id: "resources", label: "Resources", icon: "book" },
+  ];
+  return `
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand" data-action="setRole" data-role="home">
+        <span class="brand-mark">${icon("waves", 20)}</span>
+        <span class="brand-text">Jal Setu<span class="brand-sub">जल सेतु</span></span>
+      </div>
+      <nav class="nav-links">
+        ${items.map(it => `<button class="nav-link ${state.role === it.id ? "active" : ""}" data-action="setRole" data-role="${it.id}">${icon(it.icon, 15)}<span>${it.label}</span></button>`).join("")}
+      </nav>
+      <div style="display:flex; align-items:center; gap:.6rem;">
+        <span class="conn-badge ${backendOnline ? "conn-ok" : "conn-bad"}">${icon(backendOnline ? "check" : "alert", 12)} ${backendOnline ? "Live backend" : "Backend offline"}</span>
+        <button class="nav-link" data-action="doLogout" title="Sign out (${auth.username})">${icon("logout", 15)}</button>
+      </div>
+    </div>
+  </header>`;
+}
+
+/* --------------------------------------------------------------------- */
+/*  HOME                                                                  */
+/* --------------------------------------------------------------------- */
+function renderHome() {
+  const totalFunds = VILLAGES.reduce((s, v) => s + v.fundsRaised, 0);
+  const totalCredits = VILLAGES.reduce((s, v) => s + v.creditsSold, 0);
+  const redCount = VILLAGES.filter(v => v.band === "red").length;
+  return `
+  <section class="hero contour-bg">
+    <div class="hero-anim">${heroWavesSVG()}</div>
+    <div class="hero-inner">
+      <p class="eyebrow">Predictive Severity &amp; Topographic Twin-Matching Engine — live data</p>
+      <h1>A water-stress early warning system, run by the villages it protects.</h1>
+      <p class="hero-lede">Jal Setu forecasts village-level water stress weeks out using a real trained model (not a mockup), routes intervention funding from water-consuming companies to affected villages, and puts Jal Sakhis at the centre of it.</p>
+      <div class="hero-stats">
+        <div><strong>${VILLAGES.length}</strong><span>villages monitored</span></div>
+        <div><strong>${redCount}</strong><span>villages at critical stress</span></div>
+        <div><strong>${fmtINR(totalFunds)}</strong><span>routed to villages so far</span></div>
+        <div><strong>${fmtNum(totalCredits)}</strong><span>water credits sold</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="role-grid">
+    ${roleCard("gauge", "Village &amp; Command Console", "Live severity scores, forecasts, topographic twin-matching and advisories — computed by the real ML backend.", "console")}
+    ${roleCard("droplet", "Jal Sakhi Companion", "A field companion for the community water volunteer: real advisories, leak reporting, tanker scheduling with date/time, stipend tracking and scheme applications.", "jalsakhi")}
+    ${roleCard("building", "Company Dashboard", "Calculate your water offset, buy Water Credits into villages that need it most, download CSR-ready impact certificates.", "company")}
+    ${roleCard("coin", "Credits &amp; Transparency Ledger", "Every rupee, every credit, every village — a public ledger of how funding is raised and spent.", "ledger")}
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>How the Water Credits loop works</h2>
+      <p>One mechanism connects consumption, funding, and frontline livelihoods.</p>
+    </div>
+    <div class="loop-grid">
+      <div class="loop-step"><span class="loop-num">01</span><h3>Sense</h3><p>IoT borewell &amp; reservoir sensors plus rainfall data feed the severity forecaster.</p></div>
+      <div class="loop-step"><span class="loop-num">02</span><h3>Score</h3><p>Each village gets a real, model-computed severity score, banded Green / Yellow / Red.</p></div>
+      <div class="loop-step"><span class="loop-num">03</span><h3>Fund</h3><p>Companies buy Water Credits, priced higher for Red villages so urgent need attracts urgent capital.</p></div>
+      <div class="loop-step"><span class="loop-num">04</span><h3>Act</h3><p>60% funds recharge infrastructure, 25% pays Jal Sakhi stipends, 15% funds independent monitoring.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Learn from what's already working</h2>
+      <p>Real examples of rural water conservation, for context alongside your village's own advisory.</p>
+    </div>
+    <div class="video-grid">
+      ${RESOURCE_VIDEOS.map(v => `<div class="card video-card">
+        <iframe src="https://www.youtube.com/embed/${v.id}" title="${v.title}" allowfullscreen></iframe>
+        <h3>${v.title}</h3><p class="muted small">${v.note}</p>
+      </div>`).join("")}
+    </div>
+  </section>`;
+}
+function roleCard(iconName, title, desc, role) {
+  return `<button class="role-card" data-action="setRole" data-role="${role}">
+    <span class="role-card-icon">${icon(iconName, 22)}</span><h3>${title}</h3><p>${desc}</p>
+    <span class="role-card-go">Open ${icon("arrowRight", 15)}</span></button>`;
+}
+
+/* --------------------------------------------------------------------- */
+/*  RESOURCES (existing solutions)                                        */
+/* --------------------------------------------------------------------- */
+function renderResources() {
+  return `
+  <section class="section">
+    <div class="section-head">
+      <h2>Existing solutions &amp; reference material</h2>
+      <p>Videos of real water conservation approaches already working in villages — useful context alongside Jal Setu's own forecasts and advisories.</p>
+    </div>
+    <div class="video-grid">
+      ${RESOURCE_VIDEOS.map(v => `<div class="card video-card">
+        <iframe src="https://www.youtube.com/embed/${v.id}" title="${v.title}" allowfullscreen></iframe>
+        <h3>${v.title}</h3><p class="muted small">${v.note}</p>
+      </div>`).join("")}
+    </div>
+    <p class="muted small" style="margin-top:1rem">More reference videos can be added by extending the <code>RESOURCE_VIDEOS</code> list in the frontend source.</p>
+  </section>`;
+}
+
+/* --------------------------------------------------------------------- */
+/*  VILLAGE CONSOLE                                                        */
+/* --------------------------------------------------------------------- */
+async function selectVillage(id) {
+  state.selectedVillageId = id;
+  render();
+  try {
+    state.currentTwins = await fetchTwins(id);
+  } catch (e) {
+    state.currentTwins = [];
+  }
+  render();
+}
+
+function renderConsole() {
+  if (!state.selectedVillageId && VILLAGES.length) state.selectedVillageId = VILLAGES[0].id;
+  const v = village(state.selectedVillageId);
+  if (!v) return `<section class="section"><p>No village data available — check the backend is running.</p></section>`;
+
+  const ranked = rankedVillages();
+  const rank = ranked.findIndex(x => x.id === v.id) + 1;
+
+  return `
+  <section class="section">
+    <div class="section-head">
+      <h2>Village &amp; Command Console</h2>
+      <p>Live severity, forecasts and advisories — computed by the trained model, across all ${VILLAGES.length} monitored villages.</p>
+    </div>
+
+    <div class="village-strip">
+      ${VILLAGES.map(vv => `
+        <button class="v-chip v-chip-${vv.band} ${vv.id === v.id ? "active" : ""}" data-action="selectVillage" data-id="${vv.id}">
+          <span class="v-chip-dot"></span><span class="v-chip-name">${vv.name}</span><span class="v-chip-score">${vv.severity.toFixed(1)}</span>
+        </button>`).join("")}
+    </div>
+
+    <div class="console-grid">
+      <div class="card card-lg">
+        <div class="card-head">
+          <div>
+            <h3>${v.name} <span class="muted">· ${v.taluka}</span></h3>
+            <p class="muted">${v.geology} &middot; ${v.recharge} recharge potential &middot; Pop. ${fmtNum(v.population)}</p>
+          </div>
+          ${bandChip(v.band)}
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-wrap">${severityGaugeSVG(v.severity, v.band)}</div>
+          <div class="gauge-meta">
+            <div><span class="meta-label">Rank</span><span class="meta-val">#${rank} of ${VILLAGES.length}</span></div>
+            <div><span class="meta-label">Lead time</span><span class="meta-val">~6 weeks</span></div>
+            <div><span class="meta-label">Rainfall deficit</span><span class="meta-val">${v.rainfallDeficit}%</span></div>
+            <div><span class="meta-label">Availability index</span><span class="meta-val">${v.availability}/100</span></div>
+          </div>
+        </div>
+        <canvas id="chart-forecast" height="150"></canvas>
+        <p class="muted small">Endpoint anchored on the model's real prediction; the week-by-week shape between today and that point is an illustrative interpolation, not itself a per-week model output.</p>
+      </div>
+
+      <div class="card">
+        <h3>What drives the score</h3>
+        <p class="muted small">Real feature importances from the trained Gradient Boosting model</p>
+        <canvas id="chart-importance" height="200"></canvas>
+      </div>
+
+      <div class="card">
+        <h3>Topographic twins</h3>
+        <p class="muted small">Matched on geology &amp; recharge only — never on human choices like cropping</p>
+        <table class="mini-table">
+          <thead><tr><th>Village</th><th>Match</th><th>Severity</th><th>Distance</th></tr></thead>
+          <tbody>
+          ${state.currentTwins.length ? state.currentTwins.map(t => `<tr>
+            <td>${village(t.village_id)?.name || t.village_id}</td>
+            <td>${t.geology_type === v.geology ? icon("check", 14) : "—"}</td>
+            <td>${bandChip(severityBand(t.severity_score_predicted))}</td>
+            <td>${t.topo_distance}</td>
+          </tr>`).join("") : `<tr><td colspan="4" class="muted small">Loading twins…</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Advisory rule engine output</h3>
+        <p class="muted small">Real output from the backend's advisory rules — not client-side text</p>
+        <ul class="advisory-list">
+          ${adviseList(v).map(a => `<li><span class="adv-icon">${icon("check", 15)}</span><div><p>${a.title}</p></div></li>`).join("")}
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Funding &amp; stipend</h3>
+        <div class="stat-row"><span>Water Credits sold</span><strong>${fmtNum(v.creditsSold)}</strong></div>
+        <div class="stat-row"><span>Funds raised</span><strong>${fmtINR(v.fundsRaised)}</strong></div>
+        <div class="stat-row"><span>Funding goal</span><strong>${fmtINR(v.fundingGoal)}</strong></div>
+        <div class="progress"><div class="progress-bar" style="width:${Math.min(100, (v.fundsRaised / v.fundingGoal) * 100)}%"></div></div>
+        <div class="stat-row"><span>Jal Sakhi</span><strong>${v.jalSakhi.name}</strong></div>
+        <div class="stat-row"><span>This cycle's stipend</span><strong>${fmtINR(stipendFor(v).total)}</strong></div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function severityGaugeSVG(score, band) {
+  const r = 62, circumference = Math.PI * r;
+  const pct = Math.min(100, Math.max(0, score)) / 100;
+  const dash = circumference * pct;
+  const color = BAND_META[band].color;
+  return `<svg viewBox="0 0 148 90" class="gauge-svg">
+    <path d="M12 74 A62 62 0 0 1 136 74" fill="none" stroke="#E4DDC8" stroke-width="12" stroke-linecap="round"/>
+    <path d="M12 74 A62 62 0 0 1 136 74" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${dash} ${circumference}"/>
+    <text x="74" y="66" text-anchor="middle" class="gauge-score" fill="${color}">${score.toFixed(1)}</text>
+    <text x="74" y="84" text-anchor="middle" class="gauge-label">/ 100 severity</text>
+  </svg>`;
+}
+/* --------------------------------------------------------------------- */
+/*  JAL SAKHI VIEW — chat/leak/tanker now hit the real backend            */
+/* --------------------------------------------------------------------- */
+async function refreshJalSakhiData(villageId) {
+  try {
+    state.currentLeaks = await apiFetch(`/api/leak?village_id=${villageId}`);
+  } catch (e) { state.currentLeaks = []; }
+  try {
+    state.currentTankers = await apiFetch(`/api/tanker?village_id=${villageId}`);
+  } catch (e) { state.currentTankers = []; }
+}
+
+function renderJalSakhi() {
+  if (!state.activeJalSakhiVillageId && VILLAGES.length) state.activeJalSakhiVillageId = auth.villageId || VILLAGES[0].id;
+  const v = village(state.activeJalSakhiVillageId);
+  if (!v) return `<section class="section"><p>No village data available.</p></section>`;
+
+  const applied = SCHEME_APPLICATIONS[v.id] || (SCHEME_APPLICATIONS[v.id] = new Set());
+  const filteredSchemes = SCHEMES.filter(s => state.schemeFilter === "all" || s.category === state.schemeFilter);
+  const categories = ["all", ...new Set(SCHEMES.map(s => s.category))];
+
+  return `
+  <section class="section">
+    <div class="section-head-row">
+      <div><h2>Jal Sakhi Companion</h2><p>नमस्ते, ${v.jalSakhi.name} — everything for ${v.name}, backed by live data.</p></div>
+      <select class="select" data-action="switchJalSakhi">
+        ${VILLAGES.map(vv => `<option value="${vv.id}" ${vv.id === v.id ? "selected" : ""}>${vv.jalSakhi.name} — ${vv.name}</option>`).join("")}
+      </select>
+    </div>
+
+    <div class="js-grid">
+      <div class="card companion-card">
+        <div class="card-head"><h3>Ask Jal Setu</h3>${bandChip(v.band)}</div>
+        <p class="muted small">This week's status for ${v.name}: <strong>${BAND_META[v.band].label}</strong> stress, severity ${v.severity.toFixed(1)}/100 (real model output).</p>
+        <p class="muted small">This assistant only answers from real logged data (tanker requests, leak reports, severity score) — it will say so honestly if you ask something outside that.</p>
+        <div class="companion-log" id="companion-log">
+          ${state.companionLog.length ? state.companionLog.map(m => `<div class="bubble bubble-${m.from}">${m.text}</div>`).join("") : `<div class="bubble bubble-bot">Ask about tanker status, leaks, or current water severity — by voice or the buttons below.</div>`}
+        </div>
+        <div class="companion-actions">
+          <button class="mic-btn ${state.listening ? "listening" : ""}" data-action="toggleMic">${icon("mic", 20)}</button>
+          <select class="lang-select" data-action="setVoiceLang">
+            <option value="en-IN" ${state.voiceLang === "en-IN" ? "selected" : ""}>English (voice)</option>
+            <option value="mr-IN" ${state.voiceLang === "mr-IN" ? "selected" : ""}>मराठी (voice)</option>
+            <option value="hi-IN" ${state.voiceLang === "hi-IN" ? "selected" : ""}>हिंदी (voice)</option>
+          </select>
+          <button class="chip-btn" data-action="companionQuery" data-q="tanker status">${icon("truck", 15)} Tanker status</button>
+          <button class="chip-btn" data-action="companionQuery" data-q="severity status">${icon("waves", 15)} Water status</button>
+          <button class="chip-btn" data-action="openLeakForm">${icon("wrench", 15)} Report a leak</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>This week's advisory (real, from backend)</h3>
+        <ul class="advisory-list">
+          ${adviseList(v).map(a => `<li><span class="adv-icon">${icon("check", 15)}</span><div><p>${a.title}</p></div></li>`).join("")}
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Stipend &amp; earnings</h3>
+        <div class="stat-row"><span>Base honorarium</span><strong>${fmtINR(stipendFor(v).base)}</strong></div>
+        <div class="stat-row"><span>Performance bonus</span><strong>${fmtINR(stipendFor(v).performanceBonus)}</strong></div>
+        <div class="stat-row"><span>Water Credits fund share</span><strong>${fmtINR(stipendFor(v).fundBonus)}</strong></div>
+        <div class="stat-row total"><span>This cycle's total</span><strong>${fmtINR(stipendFor(v).total)}</strong></div>
+      </div>
+
+      <div class="card">
+        <h3>Tanker requests</h3>
+        <p class="muted small">Requests are stored on the server (SQLite) — persists across refreshes and devices.</p>
+        <button class="btn btn-primary" data-action="openTankerForm">${icon("truck", 16)} Request a tanker</button>
+        ${state.currentTankers.length ? `<table class="mini-table"><thead><tr><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody>
+          ${state.currentTankers.map(t => `<tr><td>${t.requested_date}</td><td>${t.requested_time}</td><td>${bandChip("green")}</td></tr>`).join("")}
+        </tbody></table>` : `<p class="muted small">No requests logged yet for this village.</p>`}
+      </div>
+
+      <div class="card">
+        <h3>Leaks reported</h3>
+        <p class="muted small"><strong>How severity is decided:</strong> you choose Minor drip / Steady leak / Burst pipe when reporting — this is a self-reported field triage tag, not sensor-measured. <strong>Where it's stored:</strong> a SQLite table on the server (<code>leaks</code>), queryable via <code>/api/leak</code>.</p>
+        ${state.currentLeaks.length ? `<table class="mini-table"><thead><tr><th>Location</th><th>Severity</th><th>Reported</th></tr></thead><tbody>
+          ${state.currentLeaks.map(l => `<tr><td>${l.location}</td><td>${l.severity}</td><td>${new Date(l.reported_at).toLocaleDateString()}</td></tr>`).join("")}
+        </tbody></table>` : `<p class="muted small">No leaks reported yet.</p>`}
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:2.5rem">
+      <h2>Government schemes you can apply for or facilitate</h2>
+      <p>Details change — always confirm at the Gram Panchayat or the official portal linked.</p>
+    </div>
+    <div class="scheme-filters">
+      ${categories.map(c => `<button class="filter-pill ${state.schemeFilter === c ? "active" : ""}" data-action="filterSchemes" data-cat="${c}">${c === "all" ? "All schemes" : c}</button>`).join("")}
+    </div>
+    <div class="scheme-grid">${filteredSchemes.map(s => schemeCard(s, applied.has(s.id), v.id)).join("")}</div>
+  </section>`;
+}
+
+function schemeCard(s, isApplied, villageId) {
+  return `<div class="card scheme-card">
+    <div class="scheme-head"><span class="scheme-level">${s.level}</span><span class="scheme-cat">${s.category}</span></div>
+    <h3>${s.name}</h3><p class="muted small">${s.agency}</p><p class="scheme-benefit">${s.benefit}</p>
+    <details><summary>Eligibility &amp; documents</summary>
+      <p class="muted small"><strong>Eligibility</strong></p><ul class="tiny-list">${s.eligibility.map(e => `<li>${e}</li>`).join("")}</ul>
+      <p class="muted small"><strong>Documents needed</strong></p><ul class="tiny-list">${s.documents.map(d => `<li>${d}</li>`).join("")}</ul>
+    </details>
+    <div class="scheme-actions">
+      <a class="btn btn-ghost" href="${s.link}" target="_blank" rel="noopener">${icon("arrowRight", 15)} Official portal</a>
+      <button class="btn ${isApplied ? "btn-done" : "btn-primary"}" data-action="markApplied" data-scheme="${s.id}" data-village="${villageId}">${isApplied ? icon("check", 15) + " Applied" : "Mark as applied"}</button>
+    </div>
+  </div>`;
+}
+
+/* --------------------------------------------------------------------- */
+/*  COMPANY VIEW (product-layer simulation, seeded from real villages)    */
+/* --------------------------------------------------------------------- */
+function renderCompany() {
+  const c = COMPANIES.find(x => x.id === state.activeCompanyId);
+  let list = [...VILLAGES];
+  if (state.marketplaceDistrict !== "all") list = list.filter(v => v.taluka === state.marketplaceDistrict);
+  if (state.marketplaceSort === "severity") list.sort((a, b) => b.severity - a.severity);
+  if (state.marketplaceSort === "price") list.sort((a, b) => creditPrice(a) - creditPrice(b));
+  if (state.marketplaceSort === "funded") list.sort((a, b) => (b.fundsRaised / b.fundingGoal) - (a.fundsRaised / a.fundingGoal));
+  const districts = ["all", ...new Set(VILLAGES.map(v => v.taluka))];
+  const recommended = state.companyLiters ? recommendedCredits(Number(state.companyLiters)) : null;
+  const tier = c.totalSpent >= 200000 ? "Platinum" : c.totalSpent >= 100000 ? "Gold" : c.totalSpent >= 30000 ? "Silver" : "Bronze";
+
+  return `
+  <section class="section">
+    <div class="section-head-row">
+      <div><h2>Company Dashboard</h2><p>Offset your water footprint directly into the villages that need it most.</p></div>
+      <select class="select" data-action="switchCompany">${COMPANIES.map(cc => `<option value="${cc.id}" ${cc.id === c.id ? "selected" : ""}>${cc.name}</option>`).join("")}</select>
+    </div>
+    <div class="company-grid">
+      <div class="card">
+        <div class="card-head"><h3>${c.name}</h3><span class="tier-badge tier-${tier.toLowerCase()}">${tier} Partner</span></div>
+        <p class="muted small">${c.industry} &middot; ~${fmtNum(c.monthlyLiters)} L / month reported consumption</p>
+        <div class="stat-row"><span>Total contributed</span><strong>${fmtINR(c.totalSpent)}</strong></div>
+        <div class="stat-row"><span>Water Credits purchased</span><strong>${fmtNum(c.totalCredits)}</strong></div>
+        <div class="stat-row"><span>Villages supported</span><strong>${c.villagesSupported.size}</strong></div>
+        <button class="btn btn-primary" data-action="downloadCertificate" data-id="${c.id}">${icon("download", 16)} Download CSR certificate</button>
+      </div>
+      <div class="card">
+        <h3>Calculate your offset</h3>
+        <div class="calc-row"><input class="input" type="number" placeholder="e.g. 4200000" id="liters-input" value="${state.companyLiters}"/>
+          <button class="btn btn-primary" data-action="calcOffset">${icon("gauge", 15)} Calculate</button></div>
+        ${recommended ? `<div class="calc-result">Recommended: <strong>${fmtNum(recommended)} Water Credits</strong> (${fmtNum(recommended * CREDIT_LITERS)} L)</div>` : ""}
+      </div>
+    </div>
+    <div class="section-head" style="margin-top:2rem"><h2>Water Credits Marketplace</h2>
+      <p>Pricing reflects each village's REAL severity band — Red villages price higher and carry a higher impact multiplier.</p></div>
+    <div class="marketplace-controls">
+      <select class="select" data-action="sortMarketplace">
+        <option value="severity" ${state.marketplaceSort === "severity" ? "selected" : ""}>Sort: most urgent first</option>
+        <option value="price" ${state.marketplaceSort === "price" ? "selected" : ""}>Sort: lowest price first</option>
+        <option value="funded" ${state.marketplaceSort === "funded" ? "selected" : ""}>Sort: closest to funded</option>
+      </select>
+      <select class="select" data-action="filterDistrict">${districts.map(d => `<option value="${d}" ${state.marketplaceDistrict === d ? "selected" : ""}>${d === "all" ? "All talukas" : d}</option>`).join("")}</select>
+    </div>
+    <div class="market-grid">${list.map(v => marketCard(v)).join("")}</div>
+  </section>`;
+}
+function marketCard(v) {
+  const price = creditPrice(v);
+  const pctFunded = Math.min(100, Math.round((v.fundsRaised / v.fundingGoal) * 100));
+  return `<div class="card market-card">
+    <div class="card-head"><h3>${v.name}</h3>${bandChip(v.band)}</div>
+    <p class="muted small">${v.taluka} &middot; ${v.geology} &middot; ${v.recharge} recharge</p>
+    <div class="stat-row"><span>Severity (real)</span><strong>${v.severity.toFixed(1)} / 100</strong></div>
+    <div class="stat-row"><span>Credit price</span><strong>${fmtINR(price)}</strong></div>
+    <div class="progress"><div class="progress-bar" style="width:${pctFunded}%"></div></div>
+    <p class="muted small">${fmtINR(v.fundsRaised)} of ${fmtINR(v.fundingGoal)} goal (${pctFunded}%)</p>
+    <div class="buy-row"><input class="input input-sm" type="number" min="1" value="5" id="qty-${v.id}"/>
+      <button class="btn btn-primary" data-action="buyCredits" data-id="${v.id}">${icon("coin", 15)} Buy credits</button></div>
+  </div>`;
+}
+
+/* --------------------------------------------------------------------- */
+/*  LEDGER + AWARDS                                                        */
+/* --------------------------------------------------------------------- */
+function renderLedger() {
+  const totalRaised = LEDGER.reduce((s, t) => s + t.amount, 0);
+  const totalCredits = LEDGER.reduce((s, t) => s + t.credits, 0);
+  const totalStipend = LEDGER.reduce((s, t) => s + t.allocation.stipend, 0);
+  return `
+  <section class="section">
+    <div class="section-head"><h2>Water Credits &amp; Transparency Ledger</h2><p>Every transaction, visible to all roles.</p></div>
+    <div class="ledger-stats">
+      <div class="stat-card"><span>${icon("coin", 18)}</span><strong>${fmtINR(totalRaised)}</strong><p>Total raised</p></div>
+      <div class="stat-card"><span>${icon("droplet", 18)}</span><strong>${fmtNum(totalCredits)}</strong><p>Water Credits sold</p></div>
+      <div class="stat-card"><span>${icon("users", 18)}</span><strong>${fmtINR(totalStipend)}</strong><p>Paid to Jal Sakhi stipends</p></div>
+    </div>
+    <div class="card card-lg"><h3>Transaction ledger</h3>
+      <table class="mini-table"><thead><tr><th>ID</th><th>Date</th><th>Company</th><th>Village</th><th>Credits</th><th>Amount</th></tr></thead>
+        <tbody>${LEDGER.map(t => `<tr><td>${t.id}</td><td>${t.date}</td><td>${COMPANIES.find(c=>c.id===t.companyId).name}</td><td>${village(t.villageId).name} ${bandChip(village(t.villageId).band)}</td><td>${t.credits}</td><td>${fmtINR(t.amount)}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
+  </section>`;
+}
+function renderAwards() {
+  const ranked = rankedVillages();
+  const winner = ranked[0];
+  return `
+  <section class="section">
+    <div class="section-head"><h2>Village Awards</h2><p>Composite score blends real severity trend with participation/quality (product-layer metrics).</p></div>
+    <div class="award-hero card">
+      <span class="award-hero-icon">${icon("award", 34)}</span>
+      <div><p class="eyebrow">Best Village — this cycle</p><h2>${winner.name}</h2><p class="muted">${winner.taluka} &middot; Score ${awardScore(winner)} &middot; ${bandChip(winner.band)}</p></div>
+    </div>
+    <div class="card card-lg" style="margin-top:1.5rem"><h3>Full leaderboard</h3>
+      <table class="mini-table"><thead><tr><th>#</th><th>Village</th><th>Status</th><th>Score</th></tr></thead>
+        <tbody>${ranked.map((v,i) => `<tr><td>${i+1}</td><td>${v.name}</td><td>${bandChip(v.band)}</td><td>${awardScore(v)}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
+  </section>`;
+}
+/* --------------------------------------------------------------------- */
+/*  MASTER RENDER                                                          */
+/* --------------------------------------------------------------------- */
+function render() {
+  const app = document.getElementById("app");
+
+  if (!isLoggedIn()) {
+    app.innerHTML = renderLogin();
+    renderToast();
+    return;
+  }
+
+  if (state.loading) {
+    app.innerHTML = `<div class="login-wrap"><p>${icon("waves",22)} Loading live data from backend…</p></div>`;
+    return;
+  }
+  if (state.loadError) {
+    app.innerHTML = `<div class="login-wrap"><div class="login-card"><h3>Can't reach the backend</h3><p class="muted small">${state.loadError}</p><p class="muted small">Make sure <code>python src/api_server.py</code> is running, then reload this page.</p><button class="btn btn-primary" onclick="location.reload()">Retry</button></div></div>`;
+    return;
+  }
+
+  let body = "";
+  if (state.role === "home") body = renderHome();
+  else if (state.role === "console") body = renderConsole();
+  else if (state.role === "jalsakhi") body = renderJalSakhi();
+  else if (state.role === "company") body = renderCompany();
+  else if (state.role === "ledger") body = renderLedger();
+  else if (state.role === "awards") body = renderAwards();
+  else if (state.role === "resources") body = renderResources();
+
+  app.innerHTML = renderNav() + `<main>${body}</main>` + renderFooter();
+  renderToast();
+  drawCharts();
+}
+function renderFooter() {
+  return `<footer class="site-footer">
+    <p>Jal Setu — a water-stress early warning system for rural Maharashtra. Built by students of Cummins College of Engineering, Pune.</p>
+    <p class="muted small">Scheme names, portals and figures are illustrative of real government programmes — always confirm current eligibility and amounts with the Gram Panchayat or the linked official portal before applying. Company/marketplace figures are a product-layer simulation; village severity, geology, and advisories come from the live ML backend.</p>
+  </footer>`;
+}
+function renderToast() {
+  const root = document.getElementById("toast-root");
+  root.innerHTML = state.toast ? `<div class="toast">${icon("check", 15)} ${state.toast}</div>` : "";
+}
+
+/* --------------------------------------------------------------------- */
+/*  CHARTS                                                                  */
+/* --------------------------------------------------------------------- */
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+function drawCharts() {
+  const feColor = "#16232A";
+  if (document.getElementById("chart-forecast")) {
+    const v = village(state.selectedVillageId);
+    const data = forecastTrend(v.severity);
+    destroyChart("forecast");
+    charts.forecast = new Chart(document.getElementById("chart-forecast"), {
+      type: "line",
+      data: { labels: data.map(d => d.week), datasets: [{ label: "Forecast severity", data: data.map(d => d.severity),
+        borderColor: BAND_META[v.band].color, backgroundColor: BAND_META[v.band].color + "33", fill: true, tension: 0.35, pointRadius: 3 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100, ticks: { color: feColor } }, x: { ticks: { color: feColor } } } },
+    });
+  }
+  if (document.getElementById("chart-importance")) {
+    destroyChart("importance");
+    charts.importance = new Chart(document.getElementById("chart-importance"), {
+      type: "bar",
+      data: { labels: FEATURE_IMPORTANCE.map(f => f.name), datasets: [{ data: FEATURE_IMPORTANCE.map(f => f.value), backgroundColor: "#1B6E71" }] },
+      options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { ticks: { color: feColor } }, y: { ticks: { color: feColor } } } },
+    });
+  }
+}
+
+/* --------------------------------------------------------------------- */
+/*  ACTIONS                                                                */
+/* --------------------------------------------------------------------- */
+const actions = {
+  setRole(btn) { setRole(btn.dataset.role); },
+  closeModal() { closeModal(); },
+
+  async doLogin() {
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value;
+    try {
+      const data = await apiFetch("/api/login", { method: "POST", body: JSON.stringify({ username, password }) });
+      setAuth(data);
+      await bootApp();
+    } catch (e) {
+      document.getElementById("login-error").innerHTML = `<div class="login-error">${e.message}</div>`;
+    }
+  },
+  async doLogout() {
+    try { await apiFetch("/api/logout", { method: "POST" }); } catch (e) {}
+    clearAuth();
+    render();
+  },
+
+  async selectVillage(btn) { await selectVillage(btn.dataset.id); },
+
+  async switchJalSakhi(el) {
+    state.activeJalSakhiVillageId = el.value;
+    await refreshJalSakhiData(el.value);
+    render();
+  },
+  switchCompany(el) { state.activeCompanyId = el.value; render(); },
+  setVoiceLang(el) { state.voiceLang = el.value; },
+
+  openLeakForm() {
+    openModal(`
+      <h3>Report a leak</h3>
+      <label class="form-label">Location description</label>
+      <input class="input" id="leak-location" style="width:100%" placeholder="e.g. near community tank, main pipe"/>
+      <label class="form-label">Severity (self-assessed)</label>
+      <select class="select" id="leak-severity" style="width:100%">
+        <option>Minor drip</option><option>Steady leak</option><option>Burst pipe</option>
+      </select>
+      <div class="modal-actions"><button class="btn btn-ghost" data-action="closeModal">Cancel</button>
+      <button class="btn btn-primary" data-action="submitLeak">${icon("check", 15)} Submit report</button></div>`);
+  },
+  async submitLeak() {
+    const location = document.getElementById("leak-location").value.trim() || "Unspecified location";
+    const severity = document.getElementById("leak-severity").value;
+    try {
+      await apiFetch("/api/leak", { method: "POST", body: JSON.stringify({ village_id: state.activeJalSakhiVillageId, location, severity }) });
+      await refreshJalSakhiData(state.activeJalSakhiVillageId);
+      closeModal();
+      showToast("Leak reported and saved to the server.");
+      render();
+    } catch (e) { showToast("Failed to save: " + e.message); }
+  },
+
+  openTankerForm() {
+    const d = nextTuesday();
+    const dateStr = d.toISOString().slice(0, 10);
+    openModal(`
+      <h3>Request a tanker</h3>
+      <label class="form-label">Preferred date</label>
+      <input class="input" type="date" id="tanker-date" style="width:100%" value="${dateStr}"/>
+      <label class="form-label">Preferred time</label>
+      <input class="input" type="time" id="tanker-time" style="width:100%" value="09:00"/>
+      <div class="modal-actions"><button class="btn btn-ghost" data-action="closeModal">Cancel</button>
+      <button class="btn btn-primary" data-action="submitTanker">${icon("check", 15)} Submit request</button></div>`);
+  },
+  async submitTanker() {
+    const date = document.getElementById("tanker-date").value;
+    const time = document.getElementById("tanker-time").value;
+    if (!date || !time) { showToast("Please choose both a date and a time."); return; }
+    try {
+      await apiFetch("/api/tanker", { method: "POST", body: JSON.stringify({ village_id: state.activeJalSakhiVillageId, date, time }) });
+      await refreshJalSakhiData(state.activeJalSakhiVillageId);
+      closeModal();
+      showToast(`Tanker requested for ${date} at ${time}.`);
+      render();
+    } catch (e) { showToast("Failed to save: " + e.message); }
+  },
+
+  toggleMic() {
+    state.listening = !state.listening;
+    render();
+    if (!state.listening) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { showToast("Voice recognition isn't supported in this browser — try Chrome."); state.listening = false; render(); return; }
+    const rec = new SR();
+    rec.lang = state.voiceLang; rec.interimResults = false; rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      state.companionLog.push({ from: "user", text });
+      state.listening = false; render();
+      respondCompanion(text);
+    };
+    rec.onerror = () => { state.listening = false; render(); };
+    rec.onend = () => { if (state.listening) { state.listening = false; render(); } };
+    rec.start();
+  },
+  companionQuery(btn) { respondCompanion(btn.dataset.q); },
+
+  filterSchemes(btn) { state.schemeFilter = btn.dataset.cat; render(); },
+  markApplied(btn) {
+    const set = SCHEME_APPLICATIONS[btn.dataset.village] || (SCHEME_APPLICATIONS[btn.dataset.village] = new Set());
+    if (set.has(btn.dataset.scheme)) set.delete(btn.dataset.scheme); else set.add(btn.dataset.scheme);
+    render();
+  },
+
+  calcOffset() { state.companyLiters = document.getElementById("liters-input").value; render(); },
+  sortMarketplace(el) { state.marketplaceSort = el.value; render(); },
+  filterDistrict(el) { state.marketplaceDistrict = el.value; render(); },
+  buyCredits(btn) {
+    const id = btn.dataset.id;
+    const qty = Math.max(1, parseInt(document.getElementById("qty-" + id).value, 10) || 1);
+    const tx = recordTransaction(state.activeCompanyId, id, qty);
+    showToast(`Purchased ${qty} Water Credits in ${village(id).name} for ${fmtINR(tx.amount)}.`);
+    render();
+  },
+
+  downloadCertificate(btn) { showToast("PDF export omitted in this build — wire up jsPDF as in the original file if needed."); },
+};
+
+async function respondCompanion(message) {
+  const v = village(state.activeJalSakhiVillageId);
+  try {
+    const data = await apiFetch("/api/chat", { method: "POST", body: JSON.stringify({ village_id: v.id, message }) });
+    state.companionLog.push({ from: "bot", text: data.reply });
+  } catch (e) {
+    state.companionLog.push({ from: "bot", text: "Couldn't reach the backend for an answer just now." });
+  }
+  render();
+}
+
+/* --------------------------------------------------------------------- */
+/*  EVENT DELEGATION                                                       */
+/* --------------------------------------------------------------------- */
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  e.preventDefault();
+  const fn = actions[el.dataset.action];
+  if (fn) fn(el, e);
+});
+document.addEventListener("change", (e) => {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const fn = actions[el.dataset.action];
+  if (fn) fn(el, e);
+});
+
+/* --------------------------------------------------------------------- */
+/*  BOOT                                                                    */
+/* --------------------------------------------------------------------- */
+async function bootApp() {
+  state.loading = true; state.loadError = null;
+  render();
+  try {
+    await checkBackend();
+    await loadVillages();
+    await loadFeatureImportance();
+    if (auth.villageId) state.activeJalSakhiVillageId = auth.villageId;
+    if (state.activeJalSakhiVillageId) await refreshJalSakhiData(state.activeJalSakhiVillageId);
+    state.loading = false;
+  } catch (e) {
+    state.loading = false;
+    state.loadError = e.message;
+  }
+  render();
+}
+
+if (isLoggedIn()) { bootApp(); } else { render(); }
+</script>
+</body>
+</html>

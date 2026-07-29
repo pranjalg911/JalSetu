@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Trained model artifacts (regenerate locally, don't bloat the repo)
+models/*.joblib
+
+# Logs (don't commit test/demo run history)
+logs/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+# Local SQLite dev database
+jalsetu.db
