@@ -188,4 +188,4 @@ This runs the model on 40 synthetic villages and prints:
 
 ## Team
 
-Built by Manasi Deshpande as part of the Jal Setu submission for the CIF Water Innovation Challenge.
+Built by Students of MKSSS Cummins College as part of the Jal Setu submission for the CIF Water Innovation Challenge.
